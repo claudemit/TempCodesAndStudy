@@ -7,8 +7,8 @@
     <ProjectGuid>{DC607BB6-91FE-4F1D-8255-84067C224B3F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MeshOptions</RootNamespace>
-    <AssemblyName>MeshOptions</AssemblyName>
+    <RootNamespace>CollideTree</RootNamespace>
+    <AssemblyName>CollideTree</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Class1.cs" />
     <Compile Include="Class2.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
