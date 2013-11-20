@@ -31,10 +31,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="GH_IO">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Rhinoceros 5 (64-bit)\Plug-ins\grasshopper_0.9.56.0\GH_IO.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper {B45A29B1-4343-4035-989E-044E8580D9CF}\0.9.61.0\GH_IO.dll</HintPath>
     </Reference>
     <Reference Include="Grasshopper">
-      <HintPath>..\..\..\..\..\..\..\Program Files\Rhinoceros 5 (64-bit)\Plug-ins\grasshopper_0.9.56.0\Grasshopper.dll</HintPath>
+      <HintPath>..\..\..\..\..\AppData\Roaming\McNeel\Rhinoceros\5.0\Plug-ins\Grasshopper {B45A29B1-4343-4035-989E-044E8580D9CF}\0.9.61.0\Grasshopper.dll</HintPath>
     </Reference>
     <Reference Include="MeshClassLibrary">
       <HintPath>..\..\MeshClassLibrary\MeshClassLibrary\bin\Debug\MeshClassLibrary.dll</HintPath>
