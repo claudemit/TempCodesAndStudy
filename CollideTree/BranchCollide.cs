@@ -26,7 +26,7 @@ using System.Runtime.InteropServices;
 /// <summary>
 /// This class will be instantiated on demand by the Script component.
 /// </summary>
-public class class1 : GH_ScriptInstance
+public class Branch : GH_ScriptInstance
 {
     #region Utility functions
     private void Print(string text) { /* Implementation hidden. */ }

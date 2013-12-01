@@ -26,10 +26,12 @@ using System.Runtime.InteropServices;
 
 using MeshClassLibrary;
 
+
+
 /// <summary>
 /// This class will be instantiated on demand by the Script component.
 /// </summary>
-public class Treepipe : GH_ScriptInstance
+public class TeePipe : GH_ScriptInstance
 {
     #region Utility functions
     /// <summary>Print a String to the [Out] Parameter of the Script component.</summary>
@@ -66,65 +68,130 @@ public class Treepipe : GH_ScriptInstance
     /// Output parameters as ref arguments. You don't have to assign output parameters,
     /// they will have a default value.
     /// </summary>
-    private void RunScript(List<Line> x, Point3d y, ref object A,ref object B)
+    private void RunScript(List<Line> x, List<Point3d> y, ref object A, ref object B, ref object C)
     {
         try
         {
             List<IndexPair> id; List<Vertice> vs;
-            Vertice.CreateCollection(x,out id,out vs);
+            Vertice.CreateCollection(x, out id, out vs);
             for (int i = 0; i < vs.Count; i++)
             {
-                if (vs[i].equalTo(y)) { vs[i].energe = 10; break; }
+                for (int j = 0; j < y.Count; j++)
+                {
+                    if (vs[i].equalTo(y[j])) { vs[i].energe = 0.8; break; }
+                }
             }
             for (int i = 0; i < 10; i++)
             {
-                vs.ForEach(delegate(Vertice v) { v.transferEnerge(0.9, ref vs); });
+                vs.ForEach(delegate(Vertice v) { v.transferEnerge(0.70, ref vs); });
             }
-            A = Vertice.DisplayEnerge(vs);
-            B = Vertice.DisplayPos(vs);
+
+            for (int i = 0; i < vs.Count; i++)
+            {
+                vs[i].CrateEdges(vs);
+                //Print(vs[i].edges.Count.ToString());
+            }
+            ////////////////
+
+            Mesh mesh = new Mesh();
+            for (int i = 0; i < id.Count; i++)
+            {
+                Polyline pl1 = new Polyline(); Polyline pl2 = new Polyline();
+                if (vs[id[i].J].refer.Count == 3)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (vs[id[i].J].refer[j] == id[i].I)
+                        {
+                            pl1 = vs[id[i].J].edges[j]; break;
+                        }
+                    }
+                }
+                if (vs[id[i].I].refer.Count == 3)
+                {
+                    for (int j = 0; j < 3; j++)
+                    {
+                        if (vs[id[i].I].refer[j] == id[i].J)
+                        {
+                            pl2 = vs[id[i].I].edges[j]; break;
+                        }
+                    }
+                }
+                //Print(pl1.Count.ToString());
+                if (pl1.Count == 4 && pl2.Count == 0)
+                {
+                    Plane p = new Plane(vs[id[i].I].pos, vs[vs[id[i].I].refer[0]].pos - vs[id[i].I].pos);
+                    pl2.AddRange(pl1);
+                    pl2.Transform(Transform.PlanarProjection(p));
+
+                }
+                if (pl1.Count == 0 && pl2.Count == 4)
+                {
+                    Plane p = new Plane(vs[id[i].J].pos, vs[vs[id[i].J].refer[0]].pos - vs[id[i].J].pos);
+                    pl1.AddRange(pl2);
+                    pl1.Transform(Transform.PlanarProjection(p));
+
+                }
+                if (pl1.Count == 4 && pl2.Count == 4)
+                {
+
+                    Plane p1 = new Plane(pl1[0], pl1[1], pl1[2]);
+                    Plane p2 = new Plane(pl2[0], pl2[1], pl2[2]);
+                    if (Vector3d.VectorAngle(p1.Normal, p2.Normal) > Math.PI / 2) pl2.Reverse();
+                    mesh.Append(mc.ClosedBridge(pl1, pl2));
+
+                }
+            }
+
+            A = mesh;
         }
         catch (Exception ex) { Print(ex.ToString()); }
     }
 
     // <Custom additional code> 
-
+    MeshCreation mc = new MeshCreation();
     class Vertice
-    {    
-        public  bool transferEnerge(double percentage, ref List<Vertice> vs)
+    {
+        public bool transferEnerge(double percentage, ref List<Vertice> vs)
         {
             bool sign = false;
-             if (!this.dead&&this.energe!=0)
-             {
-                 this.dead=true;
-                 for (int i = 0; i < this.refer.Count; i++)
-                 {
-                     if (vs[this.refer[i]].energe==0)
-                     {
-                         vs[this.refer[i]].energe = this.energe * percentage;
-                         sign = true;
-                     }
-                 }
-             }
-             return sign;
-         }
+            if (!this.dead && this.energe != 0)
+            {
+                this.dead = true;
+                for (int i = 0; i < this.refer.Count; i++)
+                {
+                    if (vs[this.refer[i]].energe == 0)
+                    {
+                        vs[this.refer[i]].energe = this.energe * percentage;
+                        sign = true;
+                    }
+                }
+            }
+            return sign;
+        }
         public List<Polyline> edges = new List<Polyline>();
-        public void CrateEdges(List<Vertice> vs){        
-         if (this.refer.Count == 3){
-            Point3d p1=vs[this.refer[0]].pos;Vector3d v1=p1-this.pos;v1.Unitize();v1*=this.energe/2;
-            Point3d p2=vs[this.refer[1]].pos;Vector3d v2=p1-this.pos;v2.Unitize();v2*=this.energe/2;
-            Point3d p3=vs[this.refer[2]].pos;Vector3d v3=p1-this.pos;v3.Unitize();v3*=this.energe/2;
-            Plane p = new Plane(p1,p2,p3);
-            Vector3d n = p.Normal;
-            Point3d N1 = this.pos + n * energe;
-            Point3d N2 = this.pos + n * energe;
-            Point3d p12 = this.pos + v1 + v2;
-            Point3d p23 = this.pos + v2 + v3;
-            Point3d p31 = this.pos + v3 + v1;
-            Polyline pl1 = new Polyline(); pl1.Add(N1); pl1.Add(p12); pl1.Add(N2); pl1.Add(p31);
-            Polyline pl2 = new Polyline(); pl2.Add(N1); pl1.Add(p23); pl1.Add(N2); pl1.Add(p12);
-            Polyline pl3 = new Polyline(); pl3.Add(N1); pl1.Add(p31); pl1.Add(N2); pl1.Add(p23);
-            edges.Add(pl1); edges.Add(pl2); edges.Add(pl3);
-               }
+        public void CrateEdges(List<Vertice> vs)
+        {
+            if (this.refer.Count == 3)
+            {
+                Point3d p1 = vs[this.refer[0]].pos; Vector3d v1 = p1 - this.pos; v1.Unitize();
+                Point3d p2 = vs[this.refer[1]].pos; Vector3d v2 = p2 - this.pos; v2.Unitize();
+                Point3d p3 = vs[this.refer[2]].pos; Vector3d v3 = p3 - this.pos; v3.Unitize();
+                Plane p = new Plane(p1, p2, p3);
+                Vector3d n = p.Normal; n.Unitize();
+                Point3d N1 = this.pos + n * energe;
+                Point3d N2 = this.pos - n * energe;
+                Vector3d v0 = v1 + v2; v0.Unitize(); v0 *= this.energe;
+                Point3d p12 = this.pos + v0;
+                v0 = v2 + v3; v0.Unitize(); v0 *= this.energe;
+                Point3d p23 = this.pos + v0;
+                v0 = v3 + v1; v0.Unitize(); v0 *= this.energe;
+                Point3d p31 = this.pos + v0;
+                Polyline pl1 = new Polyline(); pl1.Add(N1); pl1.Add(p12); pl1.Add(N2); pl1.Add(p31);
+                Polyline pl2 = new Polyline(); pl2.Add(N1); pl2.Add(p23); pl2.Add(N2); pl2.Add(p12);
+                Polyline pl3 = new Polyline(); pl3.Add(N1); pl3.Add(p23); pl3.Add(N2); pl3.Add(p31);
+                edges.Add(pl1); edges.Add(pl2); edges.Add(pl3);
+            }
         }
         /////////////////////basic
         public Point3d pos;
@@ -169,7 +236,7 @@ public class Treepipe : GH_ScriptInstance
                 if (refer[refer.Count - 2] != refer[refer.Count - 1]) newRefer.Add(refer[refer.Count - 1]);
                 this.refer = newRefer;
             }
-        }  
+        }
         /// //////////////////static
         public static void CreateCollection(List<Line> x, out List<IndexPair> id, out  List<Vertice> vs)
         {
