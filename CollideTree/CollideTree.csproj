@@ -57,6 +57,7 @@
     <Compile Include="BitmapOrigon.cs" />
     <Compile Include="LEDBitmap.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TreeFrame.cs" />
     <Compile Include="TreePipe.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
